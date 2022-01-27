@@ -166,7 +166,7 @@ def server():
     ct.rows = int(len(dj_cmd)/2)
     ct.cols = 2
     ct.cols_name = ["Command", "Status"]
-    ct.rows_name = [" * ", " ", " * ", " * ", " * ", " ** ", " "]
+    ct.rows_name = [" * ", " ", " * ", " * ", " ", " ** ", " "]
     ct.data = dj_cmd
     ct.footer = "Default input 1 (if no input)"
     ct.initialize()
@@ -184,32 +184,108 @@ def request(request, data):
         if i % 2 == 0:
             if int(data[i]) == int(request):
                 exec(f'dj_cmd_{request}()')
+                break
+            else:
+                print(colorama.Fore.RED + "Invalid input")
+                virtual_env()
+                server()
+                break
+        else:
+            print(colorama.Fore.RED + "Invalid input")
+            virtual_env()
+            server()
+            break
 
 
 def dj_cmd_1():
-    get_settings()
+    if os.path.exists("manage.py"):
+        project = get_input('Enter your project name :: ')
+        os.system(f"django-admin startproject {project}")
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
 
 
-def get_settings():
-    manage = open('manage.py', 'r')
-    mgr = manage.readlines()
-    var = ""
-    record = False
-    for i in mgr:
-        if "os.environ.setdefault('DJANGO_SETTINGS_MODULE'," in i:
-            for j in i:
-                if ',' in j:
-                    record = True
-                if '.' in j:
-                    record = False
-                if record:
-                    var += j
-
-    print(var[3:])
+def dj_cmd_2():
+    if os.path.exists("manage.py"):
+        if sys.platform == "win32":
+            os.system("python manage.py runserver")
+        else:
+            os.system("python3 manage.py runserver")
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
 
 
-def update_settings():
-    setting = open('dj.cfg', 'r')
+def dj_cmd_3():
+    if os.path.exists("manage.py"):
+        project = get_input('Enter your app name :: ')
+        if sys.platform == "win32":
+            os.system(f"python manage.py startapp {project}")
+        else:
+            os.system(f"python3 manage.py startapp {project}")
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
+
+
+def dj_cmd_4():
+    if os.path.exists("manage.py"):
+        spe = get_input("Any specific App (y/n) :: ")
+        if spe == "y":
+            project = get_input('Enter your app name :: ')
+            if sys.platform == "win32":
+                os.system(f"python manage.py makemigrations {project}")
+            else:
+                os.system(f"python3 manage.py makemigrations {project}")
+        else:
+            if sys.platform == "win32":
+                os.system("python manage.py makemigrations")
+            else:
+                os.system("python3 manage.py makemigrations")
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
+
+
+def dj_cmd_5():
+    if os.path.exists("manage.py"):
+        if sys.platform == "win32":
+            os.system("python manage.py migrate")
+        else:
+            os.system("python3 manage.py migrate")
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
+
+
+def dj_cmd_6():
+    if os.path.exists("manage.py"):
+        if sys.platform == "win32":
+            os.system("python manage.py createsuperuser")
+        else:
+            os.system("python3 manage.py createsuperuser")
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
+
+
+def dj_cmd_7():
+    if os.path.exists("manage.py"):
+        if sys.platform == "win32":
+            os.system("python manage.py collectstatic")
+        else:
+            os.system("python3 manage.py collectstatic")
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
 
 
 def virtual_env():
@@ -230,22 +306,55 @@ def virtual_env():
         vct.data = ["You are not in virtual environment"]
         vct.print_table()
 
-    venv = get_input("Due you have virtual environment (y/n) :: ")
-    if venv == 'y':
-        VIRTUAL_ENV = get_input("Enter the name of virtual environment :: ")
-        settings = open('dj.cfg', 'r')
-        settings_data = settings.readlines()
-        for i in settings_data:
-            if 'VIRTUAL_ENV' in i:
-                settings_data[settings_data.index(i)] = f'VIRTUAL_ENV = {VIRTUAL_ENV}'
-                break
-        settings.close()
-        settings = open('dj.cfg', 'w')
-        settings.writelines(settings_data)
-        settings.close()
+        venv = get_input("Due you have virtual environment (y/n) :: ")
+        if venv == 'y':
+            VIRTUAL_ENV = get_input("Enter the name of virtual environment :: ")
+            settings = open('dj.cfg', 'r')
+            settings_data = settings.readlines()
+            for i in settings_data:
+                if 'VIRTUAL_ENV' in i:
+                    settings_data[settings_data.index(i)] = f'VIRTUAL_ENV = "{VIRTUAL_ENV}"\n'
+                    break
+            settings.close()
+            settings = open('dj.cfg', 'w')
+            settings.writelines(settings_data)
+            settings.close()
 
-        os.system('')
+            if sys.platform == 'win32':
+                os.system(f'{VIRTUAL_ENV}\\Scripts\\activate')
+            else:
+                os.system(f'. {VIRTUAL_ENV}/bin/activate')
 
+        else:
+            wgy = get_input("Do you want to create virtual environment (y/n) :: ")
+            if wgy == 'y':
+                VIRTUAL_ENV = get_input("Enter the name of virtual environment :: ")
+                if sys.platform == 'win32':
+                    os.system('pip install virtualenv')
+                    os.system(f'virtualenv {VIRTUAL_ENV}')
+                else:
+                    os.system('pip3 install virtualenv')
+                    os.system('virtualenv {VIRTUAL_ENV}')
+                settings = open('dj.cfg', 'r')
+                settings_data = settings.readlines()
+                for i in settings_data:
+                    if 'VIRTUAL_ENV' in i:
+                        settings_data[settings_data.index(i)] = f'VIRTUAL_ENV = {VIRTUAL_ENV}'
+                        break
+                settings.close()
+                settings = open('dj.cfg', 'w')
+                settings.writelines(settings_data)
+                settings.close()
+
+                if sys.platform == 'win32':
+                    os.system(f'{VIRTUAL_ENV}\\Scripts\\activate')
+                else:
+                    os.system(f'. {VIRTUAL_ENV}/bin/activate')
+    else:
+        if sys.platform == 'win32':
+            os.system(f'{VIRTUAL_ENV}\\Scripts\\activate')
+        else:
+            os.system(f'. {VIRTUAL_ENV}/bin/activate')
 
 if __name__ == '__main__':
     virtual_env()

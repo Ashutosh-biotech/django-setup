@@ -171,30 +171,12 @@ def server():
     ct.footer = "Default input 1 (if no input)"
     ct.initialize()
     ct.print_table()
-    request(get_input(f"Choose any option from given { int(len(dj_cmd)/2) } options  ::  "), ct.data)
+    exec(f'dj_cmd_{get_input(f"Choose any option from given { int(len(dj_cmd)/2) } options  ::  ")}()')
 
 
 def get_input(input_name):
     key = input(colorama.Fore.LIGHTBLUE_EX + input_name + colorama.Fore.LIGHTCYAN_EX)
     return key
-
-
-def request(request, data):
-    for i in range(len(data)):
-        if i % 2 == 0:
-            if int(data[i]) == int(request):
-                exec(f'dj_cmd_{request}()')
-                break
-            else:
-                print(colorama.Fore.RED + "Invalid input")
-                virtual_env()
-                server()
-                break
-        else:
-            print(colorama.Fore.RED + "Invalid input")
-            virtual_env()
-            server()
-            break
 
 
 def dj_cmd_1():

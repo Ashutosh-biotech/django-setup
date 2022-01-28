@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import colorama
+import webbrowser
 
 colorama.init()
 
@@ -85,9 +86,9 @@ class Create_table():
         for i in range(self.cols):
             if self.cols_name[i] != '':
                 print_ray()
-                print(colorama.Fore.YELLOW + '{:^{}}'.format(self.cols_name[i], self.max_length), end='')
+                print(colorama.Fore.BLACK + '{:^{}}'.format(self.cols_name[i], self.max_length), end='')
             else:
-                print(colorama.Fore.YELLOW + '{:^{}}'.format('', self.max_length), end='')
+                print(colorama.Fore.BLACK + '{:^{}}'.format('', self.max_length), end='')
         
         print_ray(end=False)
 
@@ -191,10 +192,15 @@ def dj_cmd_1():
 
 def dj_cmd_2():
     if os.path.exists("manage.py"):
+        server = get_server_url()
         if sys.platform == "win32":
-            os.system("python manage.py runserver")
+            webbrowser.open(f'http://{server}')
+            print("Please Wait server is starting")
+            os.system(f"python manage.py runserver {server}")
         else:
-            os.system("python3 manage.py runserver")
+            webbrowser.open(f'http://{server}')
+            print("Please Wait server is starting")
+            os.system(f"python3 manage.py runserver {server}")
     else:
         print("Error: manage.py not found")
         time.sleep(3)
@@ -337,6 +343,46 @@ def virtual_env():
             os.system(f'{VIRTUAL_ENV}\\Scripts\\activate')
         else:
             os.system(f'. {VIRTUAL_ENV}/bin/activate')
+
+
+def get_server_url():
+    settings = open('dj.cfg', 'r')
+    settings_data = settings.readlines()
+    for i in settings_data:
+        if 'SERVER_URL' in i:
+            url = i[13:]
+            
+    SERVER_URL = eval(url)
+
+    for i in settings_data:
+        if 'SERVER_PORT' in i:
+            port = i[13:]
+
+    SERVER_PORT = eval(port)
+
+    settings.close()
+    if SERVER_URL == None:
+        settings = open('dj.cfg', 'r')
+        settings_data = settings.readlines()
+        for i in settings_data:
+            if 'SERVER_URL' in i:
+                settings_data[settings_data.index(i)] = f'SERVER_URL = "127.0.0.1"\n'
+                break
+
+        for i in settings_data:
+            if 'SERVER_PORT' in i:
+                settings_data[settings_data.index(i)] = f'SERVER_PORT = "8000"\n'
+                break
+
+        settings.close()
+        settings = open('dj.cfg', 'w')
+        settings.writelines(settings_data)
+        settings.close()
+    else:
+        pass
+
+    return f"{SERVER_URL}:{SERVER_PORT}"
+
 
 if __name__ == '__main__':
     virtual_env()

@@ -180,6 +180,10 @@ def get_input(input_name):
     return key
 
 
+def dj_cmd_():
+    dj_cmd_1()
+
+
 def dj_cmd_1():
     if os.path.exists("manage.py"):
         project = get_input('Enter your project name :: ')

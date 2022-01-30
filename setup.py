@@ -188,6 +188,7 @@ def dj_cmd_1():
     if os.path.exists("manage.py"):
         project = get_input('Enter your project name :: ')
         os.system(f"django-admin startproject {project}")
+        server()
     else:
         print("Error: manage.py not found")
         time.sleep(3)
@@ -201,10 +202,12 @@ def dj_cmd_2():
             webbrowser.open(f'http://{server}')
             print("Please Wait server is starting")
             os.system(f"python manage.py runserver {server}")
+            server()
         else:
             webbrowser.open(f'http://{server}')
             print("Please Wait server is starting")
             os.system(f"python3 manage.py runserver {server}")
+            server()
     else:
         print("Error: manage.py not found")
         time.sleep(3)
@@ -216,8 +219,10 @@ def dj_cmd_3():
         project = get_input('Enter your app name :: ')
         if sys.platform == "win32":
             os.system(f"python manage.py startapp {project}")
+            server()
         else:
             os.system(f"python3 manage.py startapp {project}")
+            server()
     else:
         print("Error: manage.py not found")
         time.sleep(3)
@@ -231,13 +236,17 @@ def dj_cmd_4():
             project = get_input('Enter your app name :: ')
             if sys.platform == "win32":
                 os.system(f"python manage.py makemigrations {project}")
+                server()
             else:
                 os.system(f"python3 manage.py makemigrations {project}")
+                server()
         else:
             if sys.platform == "win32":
                 os.system("python manage.py makemigrations")
+                server()
             else:
                 os.system("python3 manage.py makemigrations")
+                server()
     else:
         print("Error: manage.py not found")
         time.sleep(3)
@@ -248,8 +257,10 @@ def dj_cmd_5():
     if os.path.exists("manage.py"):
         if sys.platform == "win32":
             os.system("python manage.py migrate")
+            server()
         else:
             os.system("python3 manage.py migrate")
+            server()
     else:
         print("Error: manage.py not found")
         time.sleep(3)
@@ -260,8 +271,10 @@ def dj_cmd_6():
     if os.path.exists("manage.py"):
         if sys.platform == "win32":
             os.system("python manage.py createsuperuser")
+            server()
         else:
             os.system("python3 manage.py createsuperuser")
+            server()
     else:
         print("Error: manage.py not found")
         time.sleep(3)
@@ -272,8 +285,10 @@ def dj_cmd_7():
     if os.path.exists("manage.py"):
         if sys.platform == "win32":
             os.system("python manage.py collectstatic")
+            server()
         else:
             os.system("python3 manage.py collectstatic")
+            server()
     else:
         print("Error: manage.py not found")
         time.sleep(3)

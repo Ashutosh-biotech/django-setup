@@ -7,7 +7,3 @@
  `
  Run setup.py file and have fun .
  `
- 
- ## Requirements 
-  * Colorama
-  * django

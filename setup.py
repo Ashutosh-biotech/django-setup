@@ -1,183 +1,186 @@
 import os
 import sys
 import time
-import colorama
 import webbrowser
-
-colorama.init()
-
-def print_line(length):
-    print(colorama.Fore.RED + '+', end='')
-    print(colorama.Fore.RED + '-' * length, end='')
-    print(colorama.Fore.RED + '+')
+import math
 
 
-def print_plus(end=True):
+def print_line(length: int):
+    print("+" + ("-" * length) + "+")
+
+
+def print_ray(end: bool = True):
     if end:
-        print(colorama.Fore.RED + '+', end='')
+        print("|", end="")
     else:
-        print(colorama.Fore.RED + '+')
+        print("|")
 
 
-def print_ray(end=True):
-    if end:
-        print(colorama.Fore.RED + '|', end='')
-    else:
-        print(colorama.Fore.RED + '|')
-
-
-class Create_table():
-
-    def __init__(self, rows=0, cols=0, data=[], cols_name=[], rows_name=[], name="Django Setup", footer=None, header=True):
-        self.name = name
-        self.rows = rows
-        self.rows_name = rows_name
-        self.cols = cols
-        self.cols_name = cols_name
-        self.data = data
-        self.max_length = 0
-        self.footer = footer
-        self.header = header
-        self.header_length = 0
+class Create_table:
+    def __init__(self, data: dict = None, name: str | None = None, desc: str | None = None):
+        self.table_data = None
+        self.header_length = None
+        self.cols = None
+        self.cols_name = None
+        self.max_length = None
+        self.rows = None
+        self.rows_name = None
+        self.name: str | None = name
+        self.desc: str | None = desc
+        self.data: dict = data
 
     def initialize(self):
-        self.max_length = 0
-        for i in self.data:
-            if len(i) > self.max_length:
-                self.max_length = len(i)
-
-        if self.header:
-            if len(self.name) > self.max_length:
-                self.max_length = len(self.name)
-        
-        if self.footer:
-            if len(self.footer) > self.max_length:
-                self.max_length = len(self.footer)
-
-        self.max_length += 2
-        if len(self.rows_name) >= 1:
-            self.header_length = int((((self.cols * self.max_length)/2)+(self.cols * self.max_length)) + (self.cols))
+        rows_name = self.data.get("rows_name")
+        if rows_name:  # type: ignore
+            self.rows_name = list(rows_name)  # type: ignore
+            self.rows = len(self.rows_name)
+            self.data.pop("rows_name")  # type: ignore
+            data = {"": self.rows_name}
+            keys = list(self.data.keys())
+            for i in range(len(keys)):
+                data[keys[i]] = self.data[keys[i]]
+            self.data = data
         else:
-            self.header_length = (self.cols * self.max_length) + (self.cols - 1)
+            self.rows_name = []
+            self.rows = len(max(self.data.values(), key=len))  # type: ignore
+        self.max_length = []
+        self.cols_name = list(self.data.keys())  # type: ignore
+        self.cols = len(self.cols_name)
 
-    def print_table(self):
-        self.initialize()
-        self.print_header()
-        if self.cols_name != []:
-            self.print_column_name()
-        print_line(self.header_length)
-        self.print_data()
-        self.print_footer()
+        for i in range(self.cols):
+            self.max_length.append(0)
+            for j in range(self.rows):
+                if len(str(self.data[self.cols_name[i]][j])) > self.max_length[i]:  # type: ignore
+                    self.max_length[i] = len(str(self.data[self.cols_name[i]][j]))  # type: ignore
+
+        for i in range(self.cols):
+            if len(self.cols_name[i]) > self.max_length[i]:
+                self.max_length[i] = len(self.cols_name[i])
+
+        self.header_length = 0
+        for i in range(self.cols):
+            self.header_length += self.max_length[i] + 1
+        self.header_length -= 1
+
+        self.table_data = []
+        for i in range(self.rows):
+            self.table_data.append([])
+            for j in range(self.cols):
+                self.table_data[i].append(self.data[self.cols_name[j]][i])  # type: ignore
+
+    def display_cols(self):
+        print_ray()
+        for i in range(self.cols):
+            print(str(self.cols_name[i]).center(self.max_length[i]), end="|")
         print()
 
-    def print_header(self):
-        if self.header:
-            print_line(self.header_length)
-            print_ray()
-            print(colorama.Fore.GREEN + '{:^{}}'.format(self.name, self.header_length), end='')
-            print_ray(end=False)
-
+    def print_body(self):
         print_line(self.header_length)
-
-    def print_column_name(self):
-        if self.rows_name != []:
+        self.display_cols()
+        print_line(self.header_length)
+        for i in range(self.rows):
             print_ray()
-            print(colorama.Fore.GREEN + '{:^{}}'.format('', self.max_length), end='')
-        for i in range(self.cols):
-            if self.cols_name[i] != '':
-                print_ray()
-                print(colorama.Fore.BLACK + '{:^{}}'.format(self.cols_name[i], self.max_length), end='')
-            else:
-                print(colorama.Fore.BLACK + '{:^{}}'.format('', self.max_length), end='')
-        
-        print_ray(end=False)
-
-    def print_data(self):
-        data = self.get_data()
-        for i in range(len(data)):
-            if len(self.rows_name) >= 1:
-                print_ray()
-                print(colorama.Fore.GREEN + '{:^{}}'.format(self.rows_name[i], self.max_length), end='')
-            
             for j in range(self.cols):
-                if self.data[data[i][j]] != '':
-                    print_ray()
-                    print(colorama.Fore.WHITE + '{:^{}}'.format(str(self.data[data[i][j]]), self.max_length), end='')
-                else:
-                    print_ray()
-                    print(colorama.Fore.WHITE + '{:^{}}'.format('', self.max_length), end='')
-
-            
-            print_ray(end=False)
-
-    def print_footer(self):
-        if self.footer:
-            print_line(self.header_length)
-            print_ray()
-            print(colorama.Fore.GREEN + '{:^{}}'.format(self.footer, self.header_length), end='')
-            print_ray(end=False)
-        
+                print(str(self.table_data[i][j]).center(self.max_length[j]), end="|")
+            print()
+        print_line(self.header_length)
+        self.display_cols()
         print_line(self.header_length)
 
-    def get_data(self):
-        __data__ = []
-        data_key = []
-        dt = []
-        if len(self.data) == self.rows*self.cols:
-            for i in range(len(self.data)):
-                data_key.append(i)
-            
-            for i in range(self.rows):
-                for j in range(self.cols):
-                    dt.append(data_key[j])
-                __data__.append(dt)
-                dt = []
-                try:
-                    data_key.pop(0)
-                    data_key.pop(0)
-                except:
-                    pass
+    def header(self):
+        if self.name:
+            print_line(self.header_length)
+            if len(str(self.name)) > self.header_length:
+                bit_length = math.ceil(len(str(self.name)) / self.header_length)
+                bit = math.ceil(len(str(self.name)) / bit_length)
+                start = 0
+                stop = bit
+                for i in range(bit_length):
+                    if stop > len(str(self.name)):
+                        stop = len(str(self.name))
+                    if start > len(str(self.name)):
+                        break
+                    print_ray()
+                    print(str(self.name)[start:stop].center(self.header_length), end="")
+                    print_ray(False)
+                    start += bit
+                    stop += bit
+            else:
+                print_ray()
+                print(str(self.name).center(self.header_length), end="|")
+                print()
 
-            return __data__
-        else:
-            print("Error: Data is not equal to rows*cols")
-            time.sleep(3)
-            sys.exit()
+    def footer(self):
+        if self.desc:
+            if len(str(self.desc)) > self.header_length:
+                bit_length = math.ceil(len(str(self.desc)) / self.header_length)
+                bit = math.ceil(len(str(self.desc)) / bit_length)
+                start = 0
+                stop = bit
+                for i in range(bit_length):
+                    if stop > len(str(self.desc)):
+                        stop = len(str(self.desc))
+                    if start > len(str(self.desc)):
+                        break
+                    print_ray()
+                    print(str(self.desc)[start:stop].center(self.header_length), end="")
+                    print_ray(False)
+                    start += bit
+                    stop += bit
+            else:
+                print_ray()
+                print(str(self.desc).center(self.header_length), end="|")
+                print()
+            print_line(self.header_length)
+
+    def draw_table(self):
+        self.initialize()
+        self.header()
+        self.print_body()
+        self.footer()
+        print()
 
 
 def server():
-    dj_cmd = [
-        "1",
-        "Startproject",
-        "2",
-        "Runserver",
-        "3",
-        "Startapp",
-        "4",
-        "Makemigrations",
-        "5",
-        "Migrate",
-        "6",
-        "Createsuperuser",
-        "7",
-        "Collectstatic",
-    ]
-
-    ct = Create_table()
-    ct.rows = int(len(dj_cmd)/2)
-    ct.cols = 2
-    ct.cols_name = ["Command", "Status"]
-    ct.rows_name = [" * ", " ", " * ", " * ", " ", " ** ", " "]
-    ct.data = dj_cmd
-    ct.footer = "Default input 1 (if no input)"
-    ct.initialize()
-    ct.print_table()
-    exec(f'dj_cmd_{get_input(f"Choose any option from given { int(len(dj_cmd)/2) } options  ::  ")}()')
+    ct = Create_table(data = {
+        "option": [1, 2, 3, 4, 5, 6, 7, 8,9],
+        "command": [
+            "Start project",
+            "Run server",
+            "Start app",
+            "Make migrations",
+            "Migrate",
+            "Create super user",
+            "Collect static",
+            "Shell",
+		"exit"
+        ]
+    })
+    ct.draw_table()
+    exec(f'dj_cmd_{get_input(f"Choose any option from given options  ::  ")}()')
 
 
 def get_input(input_name):
-    key = input(colorama.Fore.LIGHTBLUE_EX + input_name + colorama.Fore.LIGHTCYAN_EX)
+    key = input(input_name)
     return key
+
+
+def dj_cmd_9():
+	sys.exit()
+
+
+def dj_cmd_8():
+    if os.path.exists("manage.py"):
+        if sys.platform == "win32":
+            os.system("python manage.py shell")
+            server()
+        else:
+            os.system("python3 manage.py shell")
+            server()
+    else:
+        print("Error: manage.py not found")
+        time.sleep(3)
+        sys.exit()
 
 
 def dj_cmd_():
@@ -197,16 +200,16 @@ def dj_cmd_1():
 
 def dj_cmd_2():
     if os.path.exists("manage.py"):
-        server = get_server_url()
+        url = get_server_url()
         if sys.platform == "win32":
-            webbrowser.open(f'http://{server}')
+            webbrowser.open(f'http://{url}')
             print("Please Wait server is starting")
-            os.system(f"python manage.py runserver {server}")
+            os.system(f"python manage.py runserver {url}")
             server()
         else:
-            webbrowser.open(f'http://{server}')
+            webbrowser.open(f'http://{url}')
             print("Please Wait server is starting")
-            os.system(f"python3 manage.py runserver {server}")
+            os.system(f"python3 manage.py runserver {url}")
             server()
     else:
         print("Error: manage.py not found")
@@ -295,82 +298,15 @@ def dj_cmd_7():
         sys.exit()
 
 
-def virtual_env():
-    settings = open('dj.cfg', 'r')
-    settings_data = settings.readlines()
-    for i in settings_data:
-        if 'VIRTUAL_ENV' in i:
-            env = i[14:]
-            
-    VIRTUAL_ENV = eval(env)
-    settings.close()
-    if VIRTUAL_ENV == None:
-        vct = Create_table()
-        vct.rows = 1
-        vct.cols = 1
-        vct.cols_name = []
-        vct.rows_name = []
-        vct.data = ["You are not in virtual environment"]
-        vct.print_table()
-
-        venv = get_input("Due you have virtual environment (y/n) :: ")
-        if venv == 'y':
-            VIRTUAL_ENV = get_input("Enter the name of virtual environment :: ")
-            settings = open('dj.cfg', 'r')
-            settings_data = settings.readlines()
-            for i in settings_data:
-                if 'VIRTUAL_ENV' in i:
-                    settings_data[settings_data.index(i)] = f'VIRTUAL_ENV = "{VIRTUAL_ENV}"\n'
-                    break
-            settings.close()
-            settings = open('dj.cfg', 'w')
-            settings.writelines(settings_data)
-            settings.close()
-
-            if sys.platform == 'win32':
-                os.system(f'{VIRTUAL_ENV}\\Scripts\\activate')
-            else:
-                os.system(f'. {VIRTUAL_ENV}/bin/activate')
-
-        else:
-            wgy = get_input("Do you want to create virtual environment (y/n) :: ")
-            if wgy == 'y':
-                VIRTUAL_ENV = get_input("Enter the name of virtual environment :: ")
-                if sys.platform == 'win32':
-                    os.system('pip install virtualenv')
-                    os.system(f'virtualenv {VIRTUAL_ENV}')
-                else:
-                    os.system('pip3 install virtualenv')
-                    os.system('virtualenv {VIRTUAL_ENV}')
-                settings = open('dj.cfg', 'r')
-                settings_data = settings.readlines()
-                for i in settings_data:
-                    if 'VIRTUAL_ENV' in i:
-                        settings_data[settings_data.index(i)] = f'VIRTUAL_ENV = {VIRTUAL_ENV}'
-                        break
-                settings.close()
-                settings = open('dj.cfg', 'w')
-                settings.writelines(settings_data)
-                settings.close()
-
-                if sys.platform == 'win32':
-                    os.system(f'{VIRTUAL_ENV}\\Scripts\\activate')
-                else:
-                    os.system(f'. {VIRTUAL_ENV}/bin/activate')
-    else:
-        if sys.platform == 'win32':
-            os.system(f'{VIRTUAL_ENV}\\Scripts\\activate')
-        else:
-            os.system(f'. {VIRTUAL_ENV}/bin/activate')
-
-
 def get_server_url():
+    url = "localhost"
+    port = "8000"
     settings = open('dj.cfg', 'r')
     settings_data = settings.readlines()
     for i in settings_data:
         if 'SERVER_URL' in i:
             url = i[13:]
-            
+
     SERVER_URL = eval(url)
 
     for i in settings_data:
@@ -380,7 +316,7 @@ def get_server_url():
     SERVER_PORT = eval(port)
 
     settings.close()
-    if SERVER_URL == None:
+    if SERVER_URL is None:
         settings = open('dj.cfg', 'r')
         settings_data = settings.readlines()
         for i in settings_data:
@@ -404,5 +340,4 @@ def get_server_url():
 
 
 if __name__ == '__main__':
-    virtual_env()
     server()
